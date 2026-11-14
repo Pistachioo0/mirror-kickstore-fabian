@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_commerce/app/core/theme/app_colors.dart';
+import 'package:e_commerce/app/routes/app_pages.dart';
 import '../controllers/register_controller.dart';
 
 class RegisterView extends GetView<RegisterController> {
@@ -9,181 +10,128 @@ class RegisterView extends GetView<RegisterController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isPasswordHidden = true.obs;
-    final isConfirmPasswordHidden = true.obs;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      appBar: AppBar(title: const Text('Daftar Akun')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: controller.formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 12),
               Text(
-                'Buat Akun Baru 🚀',
+                'Buat Akun Baru',
                 style: TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Daftar untuk menikmati diskon eksklusif dan kemudahan belanja sneakers.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // Form Input Nama Lengkap
-              Text(
-                'Nama Lengkap',
+                'Isi data di bawah untuk mendaftar',
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                 ),
-              ),
-              const SizedBox(height: 8),
-              const TextField(
-                decoration: InputDecoration(
-                  hintText: 'Contoh: Dimas Pratama',
-                  prefixIcon: Icon(Icons.person_outline_rounded),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Form Input Email
-              Text(
-                'Alamat Email',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const TextField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'nama@sekolah.sch.id',
-                  prefixIcon: Icon(Icons.mail_outline_rounded),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Form Input Password
-              Text(
-                'Kata Sandi',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Obx(
-                () => TextField(
-                  obscureText: isPasswordHidden.value,
-                  decoration: InputDecoration(
-                    hintText: 'Minimal 6 karakter',
-                    prefixIcon: const Icon(Icons.lock_outline_rounded),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        isPasswordHidden.value
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                      ),
-                      onPressed: () => isPasswordHidden.toggle(),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Form Input Konfirmasi Password
-              Text(
-                'Konfirmasi Kata Sandi',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Obx(
-                () => TextField(
-                  obscureText: isConfirmPasswordHidden.value,
-                  decoration: InputDecoration(
-                    hintText: 'Ulangi kata sandi di atas',
-                    prefixIcon: const Icon(Icons.lock_reset_rounded),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        isConfirmPasswordHidden.value
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                      ),
-                      onPressed: () => isConfirmPasswordHidden.toggle(),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // Tombol Daftar Akun
-              ElevatedButton(
-                onPressed: () {
-                  Get.snackbar(
-                    'Pendaftaran Berhasil 🎉',
-                    'Akunmu berhasil didaftarkan. Silakan masuk menggunakan email dan password baru.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.success,
-                    colorText: Colors.white,
-                    margin: const EdgeInsets.all(16),
-                    borderRadius: 12,
-                    duration: const Duration(seconds: 3),
-                  );
-                  Get.back();
-                },
-                child: const Text('Daftar Akun Sekarang'),
               ),
               const SizedBox(height: 24),
 
-              // Link Kembali ke Login
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Sudah punya akun? ',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => Get.back(),
-                      child: const Text(
-                        'Masuk di Sini',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
+              // Nama
+              TextFormField(
+                controller: controller.nameController,
+                validator: controller.validateName,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Lengkap',
+                  prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              // Email
+              TextFormField(
+                controller: controller.emailController,
+                validator: controller.validateEmail,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Alamat Email',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Password
+              Obx(() => TextFormField(
+                    controller: controller.passwordController,
+                    validator: controller.validatePassword,
+                    obscureText: controller.isPasswordHidden.value,
+                    decoration: InputDecoration(
+                      labelText: 'Kata Sandi',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordHidden.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: controller.togglePasswordVisibility,
+                      ),
+                    ),
+                  )),
+              const SizedBox(height: 16),
+
+              // Konfirmasi Password
+              Obx(() => TextFormField(
+                    controller: controller.confirmPasswordController,
+                    validator: controller.validateConfirmPassword,
+                    obscureText: controller.isConfirmHidden.value,
+                    decoration: InputDecoration(
+                      labelText: 'Konfirmasi Kata Sandi',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isConfirmHidden.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: controller.toggleConfirmVisibility,
+                      ),
+                    ),
+                  )),
+              const SizedBox(height: 24),
+
+              // Tombol Daftar
+              Obx(() => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed:
+                          controller.isLoading.value ? null : controller.register,
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text('Daftar'),
+                    ),
+                  )),
+              const SizedBox(height: 16),
+
+              // Link ke Login
+              TextButton(
+                onPressed: () => Get.offNamed(Routes.LOGIN),
+                child: const Text('Sudah punya akun? Masuk di sini'),
+              ),
             ],
           ),
         ),
