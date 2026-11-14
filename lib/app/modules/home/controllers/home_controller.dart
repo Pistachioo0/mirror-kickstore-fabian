@@ -1,22 +1,26 @@
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
-import 'package:e_commerce/app/routes/app_pages.dart';
+import '../../../data/models/product_model.dart';
+import '../../cart/controllers/cart_controller.dart';
+import '../../../routes/app_pages.dart';
 
 class HomeController extends GetxController {
   // 1. State reaktif
-  final cartCount = 0.obs;
   final selectedCategory = 'Semua'.obs;
   final favoriteIds = <String>{}.obs;
 
-  // 2. Formatter harga
-  final currencyFormatter = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
+  // 2. Shared CartController via DI
+  CartController get cartController {
+    if (Get.isRegistered<CartController>()) {
+      return Get.find<CartController>();
+    }
+    return Get.put(CartController());
+  }
 
-  // 3. Kategori
+  // 3. Badge keranjang baca langsung dari CartController
+  int get cartCount => cartController.totalItemCount;
+
+  // 4. Kategori
   final List<String> categories = [
     'Semua',
     'Lifestyle',
@@ -26,67 +30,73 @@ class HomeController extends GetxController {
     'Casual',
   ];
 
-  // 4. Mock data produk
-  final List<Map<String, dynamic>> products = [
-    {
-      'id': 'p1',
-      'title': 'Nike Air Jordan 1 Retro High',
-      'category': 'Basketball',
-      'price': 2499000,
-      'rating': 4.9,
-      'image': 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80',
-    },
-    {
-      'id': 'p2',
-      'title': 'Nike Air Force 1 07 Triple White',
-      'category': 'Lifestyle',
-      'price': 1549000,
-      'rating': 4.8,
-      'image': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80',
-    },
-    {
-      'id': 'p3',
-      'title': 'Adidas Ultraboost Light Running',
-      'category': 'Running',
-      'price': 2899000,
-      'rating': 4.7,
-      'image': 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=500&q=80',
-    },
-    {
-      'id': 'p4',
-      'title': 'Puma Suede Classic XXI Black',
-      'category': 'Casual',
-      'price': 1099000,
-      'rating': 4.6,
-      'image': 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80',
-    },
-    {
-      'id': 'p5',
-      'title': 'New Balance 574 Core Grey',
-      'category': 'Lifestyle',
-      'price': 1499000,
-      'rating': 4.8,
-      'image': 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=500&q=80',
-    },
-    {
-      'id': 'p6',
-      'title': 'Vans Old Skool Classic Skate',
-      'category': 'Skate',
-      'price': 999000,
-      'rating': 4.7,
-      'image': 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&q=80',
-    },
+  // 5. Katalog produk type-safe
+  final List<ProductModel> products = [
+    ProductModel(
+      id: 'p1',
+      name: 'Nike Air Jordan 1 Retro High',
+      category: 'Basketball',
+      price: 2499000,
+      rating: 4.9,
+      imageUrl:
+          'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80',
+    ),
+    ProductModel(
+      id: 'p2',
+      name: 'Nike Air Force 1 07 Triple White',
+      category: 'Lifestyle',
+      price: 1549000,
+      rating: 4.8,
+      imageUrl:
+          'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80',
+    ),
+    ProductModel(
+      id: 'p3',
+      name: 'Adidas Ultraboost Light Running',
+      category: 'Running',
+      price: 2899000,
+      rating: 4.7,
+      imageUrl:
+          'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=500&q=80',
+    ),
+    ProductModel(
+      id: 'p4',
+      name: 'Puma Suede Classic XXI Black',
+      category: 'Casual',
+      price: 1099000,
+      rating: 4.6,
+      imageUrl:
+          'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80',
+    ),
+    ProductModel(
+      id: 'p5',
+      name: 'New Balance 574 Core Grey',
+      category: 'Lifestyle',
+      price: 1499000,
+      rating: 4.8,
+      imageUrl:
+          'https://images.unsplash.com/photo-1539185441755-769473a23570?w=500&q=80',
+    ),
+    ProductModel(
+      id: 'p6',
+      name: 'Vans Old Skool Classic Skate',
+      category: 'Skate',
+      price: 999000,
+      rating: 4.7,
+      imageUrl:
+          'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&q=80',
+    ),
   ];
 
-  // 5. Getter filter
-  List<Map<String, dynamic>> get filteredProducts {
+  // 6. Getter filter
+  List<ProductModel> get filteredProducts {
     if (selectedCategory.value == 'Semua') return products;
     return products
-        .where((p) => p['category'] == selectedCategory.value)
+        .where((p) => p.category == selectedCategory.value)
         .toList();
   }
 
-  // 6. Fungsi-fungsi
+  // 7. Fungsi
   void changeCategory(String category) => selectedCategory.value = category;
 
   bool isFavorite(String id) => favoriteIds.contains(id);
@@ -99,11 +109,12 @@ class HomeController extends GetxController {
     }
   }
 
-  void addToCart(Map<String, dynamic> product) {
-    cartCount.value++;
+  // 8. Tambah ke cart lewat CartController
+  void addToCart(ProductModel product) {
+    cartController.addItem(product);
   }
 
-  void openDetail(Map<String, dynamic> product) {
+  void openDetail(ProductModel product) {
     Get.toNamed(Routes.DETAIL, arguments: product);
   }
 }

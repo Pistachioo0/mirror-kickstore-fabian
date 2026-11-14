@@ -11,166 +11,185 @@ class CartView extends GetView<CartController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Data mockup item keranjang untuk template UI
-    final mockCartItems = [
-      {
-        'title': 'Nike Air Jordan 1 Retro High',
-        'price': 'Rp 2.499.000',
-        'size': 42,
-        'quantity': 1.obs,
-        'image': 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80',
-      },
-      {
-        'title': 'Adidas Ultraboost Light Running',
-        'price': 'Rp 2.899.000',
-        'size': 41,
-        'quantity': 1.obs,
-        'image': 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=500&q=80',
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Keranjang Belanja (2)',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Kosongkan Keranjang',
-            icon: const Icon(Icons.delete_sweep_outlined, color: AppColors.error),
-            onPressed: () {
-              Get.defaultDialog(
-                title: 'Kosongkan Keranjang',
-                middleText: 'Yakin ingin menghapus seluruh belanjaan?',
-                textConfirm: 'Hapus',
-                textCancel: 'Batal',
-                confirmTextColor: Colors.white,
-                buttonColor: AppColors.error,
-                onConfirm: () => Get.back(),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
+        title: const Text('Keranjang Belanja'),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: mockCartItems.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final item = mockCartItems[index];
-          final qty = item['quantity'] as RxInt;
-
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceCard : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+      body: Obx(() {
+        if (controller.items.isEmpty) {
+          return _buildEmptyState(isDark);
+        }
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.items.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final item = controller.items[index];
+                  return _buildCartItem(item, isDark);
+                },
               ),
             ),
-            child: Row(
+            _buildSummaryCard(isDark),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildEmptyState(bool isDark) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.shopping_cart_outlined,
+            size: 80,
+            color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Keranjang masih kosong',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color:
+                  isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Yuk mulai belanja sneakers favoritmu!',
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => Get.offNamed(Routes.HOME),
+            icon: const Icon(Icons.shopping_bag_rounded),
+            label: const Text('Mulai Belanja'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartItem(dynamic item, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurfaceCard : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Gambar produk
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 80,
+              height: 80,
+              color: isDark
+                  ? AppColors.darkSurface
+                  : const Color(0xFFF1F5F9),
+              child: Image.network(
+                item.product.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported_outlined,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Info produk
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                    child: Image.network(
-                      item['image'] as String,
-                      fit: BoxFit.cover,
-                    ),
+                Text(
+                  item.product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['title'] as String,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 255, 0, 0).withAlpha(20),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          'Size ${item['size']}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Color.fromARGB(255, 229, 70, 70),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item['price'] as String,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: Color.fromARGB(255, 255, 0, 0),
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 4),
+                Text(
+                  'Size: ${item.selectedSize}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                const SizedBox(height: 8),
+                Text(
+                  item.product.formattedPrice,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Stepper
+                Row(
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
                         ),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           InkWell(
-                            onTap: () {
-                              if (qty.value > 1) qty.value--;
-                            },
-                            borderRadius: BorderRadius.circular(8),
+                            onTap: () =>
+                                controller.decreaseQuantity(item.id),
                             child: const Padding(
                               padding: EdgeInsets.all(6),
                               child: Icon(Icons.remove_rounded, size: 16),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Obx(
-                              () => Text(
-                                '${qty.value}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              '${item.quantity}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                           InkWell(
-                            onTap: () => qty.value++,
-                            borderRadius: BorderRadius.circular(8),
+                            onTap: () =>
+                                controller.increaseQuantity(item.id),
                             child: const Padding(
                               padding: EdgeInsets.all(6),
                               child: Icon(Icons.add_rounded, size: 16),
@@ -179,103 +198,123 @@ class CartView extends GetView<CartController> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.delete_outline_rounded,
-                        size: 18,
-                        color: AppColors.error,
-                      ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => _confirmRemove(item.id),
+                      icon: const Icon(Icons.delete_outline_rounded,
+                          color: AppColors.error),
                     ),
                   ],
                 ),
               ],
             ),
-          );
-        },
+          ),
+        ],
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(isDark ? 60 : 15),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
+    );
+  }
+
+  Widget _buildSummaryCard(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _rowSummary('Subtotal', controller.formattedSubtotal, isDark),
+            const SizedBox(height: 6),
+            _rowSummary('PPN 11%', controller.formattedTax, isDark),
+            const SizedBox(height: 6),
+            _rowSummary('Ongkos Kirim', controller.formattedShipping, isDark),
+            const Divider(height: 20),
+            _rowSummary(
+              'Total',
+              controller.formattedTotal,
+              isDark,
+              bold: true,
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Get.snackbar(
+                    'Checkout',
+                    'Total pembayaran ${controller.formattedTotal}',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: AppColors.success,
+                    colorText: Colors.white,
+                    margin: const EdgeInsets.all(16),
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+                icon: const Icon(Icons.payment_rounded),
+                label: const Text('Checkout'),
+              ),
             ),
           ],
         ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Subtotal',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                    ),
-                  ),
-                  Text(
-                    'Rp 5.398.000',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Diskon Spesial', style: TextStyle(fontSize: 13, color: AppColors.success)),
-                  Text(
-                    '- Rp 150.000',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.success),
-                  ),
-                ],
-              ),
-              const Divider(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total Pembayaran',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const Text(
-                    'Rp 5.248.000',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Color.fromARGB(255, 255, 0, 0),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-          
-              ElevatedButton.icon(
-                icon: const Icon(Icons.payment_rounded),
-                label: const Text('Lanjut ke Pembayaran'),
-                onPressed: () => Get.toNamed(Routes.CHECKOUT),
-                
-              ),
-            ],
+      ),
+    );
+  }
+
+  Widget _rowSummary(String label, String value, bool isDark,
+      {bool bold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: bold ? 15 : 13,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
           ),
         ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: bold ? 16 : 13,
+            fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+            color: bold
+                ? AppColors.primary
+                : (isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _confirmRemove(String id) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Hapus Item'),
+        content: const Text('Yakin ingin menghapus item ini dari keranjang?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              controller.removeItem(id);
+              Get.back();
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

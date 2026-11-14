@@ -90,7 +90,7 @@ class HomeView extends GetView<HomeController> {
                 onPressed: () => Get.toNamed(Routes.CART),
               ),
               Obx(() {
-                final count = controller.cartCount.value;
+                final count = controller.cartCount;
                 if (count == 0) return const SizedBox.shrink();
                 return Positioned(
                   right: 8,
@@ -219,7 +219,7 @@ class HomeView extends GetView<HomeController> {
             const SizedBox(height: 12),
 
             // GridView Produk Katalog
-                        Obx(() {
+                          Obx(() {
               final items = controller.filteredProducts;
               return GridView.builder(
                 shrinkWrap: true,
@@ -234,31 +234,28 @@ class HomeView extends GetView<HomeController> {
                 itemBuilder: (context, index) {
                   final product = items[index];
                   return Obx(() {
-                    final isFav =
-                        controller.isFavorite(product['id'] as String);
+                    final isFav = controller.isFavorite(product.id);
                     return ProductCard(
-                      title: product['title'] as String,
-                      category: product['category'] as String,
-                      price: controller.currencyFormatter
-                          .format(product['price']),
-                      rating: (product['rating'] as num).toDouble(),
-                      imageUrl: product['image'] as String,
+                      title: product.name,
+                      category: product.category,
+                      price: product.formattedPrice,
+                      rating: product.rating,
+                      imageUrl: product.imageUrl,
                       isFavorite: isFav,
                       onAddToCart: () {
                         controller.addToCart(product);
                         Get.snackbar(
                           'Ditambahkan',
-                          '${product['title']} ditambahkan ke keranjang!',
+                          '${product.name} ditambahkan ke keranjang!',
                           snackPosition: SnackPosition.BOTTOM,
                           backgroundColor: AppColors.success,
                           colorText: Colors.white,
                           margin: const EdgeInsets.all(16),
-                          borderRadius: 12,
                           duration: const Duration(seconds: 2),
                         );
                       },
                       onToggleFavorite: () =>
-                          controller.toggleFavorite(product['id'] as String),
+                          controller.toggleFavorite(product.id),
                       onTap: () => controller.openDetail(product),
                     );
                   });

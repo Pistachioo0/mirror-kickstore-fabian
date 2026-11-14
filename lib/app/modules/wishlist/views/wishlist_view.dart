@@ -11,31 +11,6 @@ class WishlistView extends GetView<WishlistController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Data mockup wishlist untuk template UI
-    final mockWishlist = [
-      {
-        'title': 'Nike Air Jordan 1 Retro High',
-        'category': 'Basketball',
-        'price': 'Rp 2.499.000',
-        'rating': 4.9,
-        'image': 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80',
-      },
-      {
-        'title': 'New Balance 574 Core Grey',
-        'category': 'Lifestyle',
-        'price': 'Rp 1.499.000',
-        'rating': 4.8,
-        'image': 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=500&q=80',
-      },
-      {
-        'title': 'Vans Old Skool Classic Skate',
-        'category': 'Skate',
-        'price': 'Rp 999.000',
-        'rating': 4.7,
-        'image': 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500&q=80',
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -44,146 +19,182 @@ class WishlistView extends GetView<WishlistController> {
         ),
         title: const Text('Wishlist Favorit'),
         actions: [
-          // Indikator Fitur Offline Hive CE
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.success.withAlpha(30),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.offline_pin_rounded, color: AppColors.success, size: 14),
-                SizedBox(width: 4),
-                Text(
-                  'Offline Ready',
-                  style: TextStyle(
-                    color: AppColors.success,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                tooltip: 'Keranjang Belanja',
+                icon: const Icon(Icons.shopping_bag_outlined),
+                onPressed: () => Get.toNamed(Routes.CART),
+              ),
+              Obx(() {
+                final count = controller.cartCount;
+                if (count == 0) return const SizedBox.shrink();
+                return Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppColors.error,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                );
+              }),
+            ],
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: mockWishlist.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final item = mockWishlist[index];
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceCard : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-              ),
-            ),
-            child: Row(
+      body: Obx(() {
+        final items = controller.wishlistItems;
+        if (items.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 85,
-                    height: 85,
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                    child: Image.network(
-                      item['image'] as String,
-                      fit: BoxFit.cover,
-                    ),
+                Icon(
+                  Icons.favorite_border_rounded,
+                  size: 80,
+                  color: isDark
+                      ? AppColors.darkTextMuted
+                      : AppColors.lightTextMuted,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Belum ada favorit',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['title'] as String,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['category'] as String,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item['price'] as String,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 8),
+                Text(
+                  'Tap ikon hati di produk untuk menyimpannya.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
                   ),
-                ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.favorite_rounded, color: AppColors.error),
-                      onPressed: () {
-                        Get.snackbar(
-                          'Dihapus',
-                          '${item['title']} dihapus dari wishlist.',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: AppColors.darkSurfaceCard,
-                          colorText: Colors.white,
-                          margin: const EdgeInsets.all(16),
-                          borderRadius: 12,
-                        );
-                      },
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Get.snackbar(
-                          'Keranjang',
-                          '${item['title']} dipindahkan ke keranjang belanja!',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: AppColors.success,
-                          colorText: Colors.white,
-                          margin: const EdgeInsets.all(16),
-                          borderRadius: 12,
-                        );
-                        Get.toNamed(Routes.CART);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.add_shopping_cart_rounded,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
           );
-        },
-      ),
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final product = items[index];
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurfaceCard : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
+              ),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      color: isDark
+                          ? AppColors.darkSurface
+                          : const Color(0xFFF1F5F9),
+                      child: Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.image_not_supported_outlined),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product.formattedPrice,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () =>
+                                    controller.moveToCart(product),
+                                icon: const Icon(
+                                    Icons.shopping_bag_rounded,
+                                    size: 16),
+                                label: const Text('Ke Keranjang'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 6),
+                                  textStyle: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            IconButton(
+                              onPressed: () =>
+                                  controller.removeFromWishlist(product),
+                              icon: const Icon(
+                                  Icons.favorite_rounded,
+                                  color: AppColors.error),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }
