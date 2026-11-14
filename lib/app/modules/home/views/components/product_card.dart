@@ -8,7 +8,9 @@ class ProductCard extends StatelessWidget {
   final String price;
   final double rating;
   final String imageUrl;
+  final bool isFavorite; 
   final VoidCallback? onAddToCart;
+  final VoidCallback? onToggleFavorite;
   final VoidCallback? onTap;
 
   const ProductCard({
@@ -18,7 +20,9 @@ class ProductCard extends StatelessWidget {
     required this.price,
     required this.rating,
     required this.imageUrl,
+    this.isFavorite = false,
     this.onAddToCart,
+    this.onToggleFavorite,          
     this.onTap,
   });
 
@@ -60,21 +64,29 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   // Badge Kategori
+                                    // Tombol Hati Favorit
                   Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(160),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        category,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                    top: 6,
+                    right: 6,
+                    child: InkWell(
+                      onTap: onToggleFavorite,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.black.withAlpha(160)
+                              : Colors.white.withAlpha(220),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          size: 16,
+                          color: isFavorite
+                              ? Colors.redAccent
+                              : (isDark ? Colors.white70 : Colors.black54),
                         ),
                       ),
                     ),

@@ -10,20 +10,8 @@ class DetailView extends GetView<DetailController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Data produk fallback jika dibuka langsung
-    final Map<String, dynamic> product = (Get.arguments as Map<String, dynamic>?) ?? {
-      'title': 'Nike Air Jordan 1 Retro High',
-      'category': 'Basketball',
-      'price': 'Rp 2.499.000',
-      'rating': 4.9,
-      'image': 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80',
-    };
-
+    final product = controller.product;
     final sizes = [39, 40, 41, 42, 43, 44];
-    final selectedSize = 42.obs;
-    final quantity = 1.obs;
-    final isFavorite = false.obs;
 
     return Scaffold(
       appBar: AppBar(
@@ -32,30 +20,31 @@ class DetailView extends GetView<DetailController> {
           onPressed: () => Get.back(),
         ),
         title: const Text('Detail Produk'),
-        actions: [
-          Obx(
-            () => IconButton(
+               actions: [
+          Obx(() {
+            final fav = controller.isFavorite;
+            return IconButton(
               icon: Icon(
-                isFavorite.value ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                color: isFavorite.value ? AppColors.error : null,
+                fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                color: fav ? AppColors.error : null,
               ),
               onPressed: () {
-                isFavorite.toggle();
+                controller.toggleFavorite();
                 Get.snackbar(
-                  isFavorite.value ? 'Wishlist Ditambahkan' : 'Wishlist Dihapus',
-                  isFavorite.value
-                      ? '${product['title']} disimpan ke favorit!'
-                      : '${product['title']} dihapus dari favorit.',
+                  fav ? 'Wishlist Dihapus' : 'Wishlist Ditambahkan',
+                  fav
+                      ? '${product['title']} dihapus dari favorit.'
+                      : '${product['title']} disimpan ke favorit!',
                   snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: isFavorite.value ? AppColors.accent : AppColors.darkSurfaceCard,
+                  backgroundColor:
+                      fav ? AppColors.darkSurfaceCard : AppColors.accent,
                   colorText: Colors.white,
                   margin: const EdgeInsets.all(16),
-                  borderRadius: 12,
                   duration: const Duration(seconds: 2),
                 );
               },
-            ),
-          ),
+            );
+          }),
           const SizedBox(width: 8),
         ],
       ),
@@ -141,7 +130,7 @@ class DetailView extends GetView<DetailController> {
             ),
             const SizedBox(height: 8),
             Text(
-              product['price'] as String? ?? 'Rp 0',
+              controller.homeController.currencyFormatter.format(product['price']),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -169,10 +158,10 @@ class DetailView extends GetView<DetailController> {
                 itemBuilder: (context, index) {
                   final size = sizes[index];
                   return Obx(() {
-                    final isSelected = selectedSize.value == size;
+                    final isSelected = controller.selectedSize.value == size;
                     return InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      onTap: () => selectedSize.value = size,
+                      onTap: () => controller.selectedSize.value = size,
                       child: Container(
                         width: 50,
                         decoration: BoxDecoration(
@@ -254,9 +243,7 @@ class DetailView extends GetView<DetailController> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_rounded, size: 18),
-                        onPressed: () {
-                          if (quantity.value > 1) quantity.value--;
-                        },
+                        onPressed: controller.decrementQuantity,
                         constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                         padding: EdgeInsets.zero,
                       ),
@@ -264,7 +251,7 @@ class DetailView extends GetView<DetailController> {
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         child: Obx(
                           () => Text(
-                            '${quantity.value}',
+                            '${controller.quantity.value}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -275,7 +262,7 @@ class DetailView extends GetView<DetailController> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.add_rounded, size: 18),
-                        onPressed: () => quantity.value++,
+                        onPressed: controller.incrementQuantity,
                         constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                         padding: EdgeInsets.zero,
                       ),
@@ -307,18 +294,7 @@ class DetailView extends GetView<DetailController> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.shopping_bag_rounded),
                   label: const Text('Tambah ke Keranjang'),
-                  onPressed: () {
-                    Get.snackbar(
-                      'Berhasil Ditambahkan',
-                      '${quantity.value} item ${product['title']} (Size ${selectedSize.value}) berhasil masuk ke keranjang!',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: AppColors.success,
-                      colorText: Colors.white,
-                      margin: const EdgeInsets.all(16),
-                      borderRadius: 12,
-                    );
-                    Get.toNamed(Routes.CART);
-                  },
+                  onPressed: controller.addToCart,
                 ),
               ),
             ],

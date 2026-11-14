@@ -266,10 +266,12 @@ class CartView extends GetView<CartController> {
                 ],
               ),
               const SizedBox(height: 14),
+          
               ElevatedButton.icon(
                 icon: const Icon(Icons.payment_rounded),
                 label: const Text('Lanjut ke Pembayaran'),
                 onPressed: () => Get.toNamed(Routes.CHECKOUT),
+                
               ),
             ],
           ),
