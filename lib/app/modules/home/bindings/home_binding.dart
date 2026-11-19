@@ -1,12 +1,28 @@
 import 'package:get/get.dart';
 
+import '../../../core/network/dio_client.dart';
+import '../../../data/remote/product_remote_datasource.dart';
+import '../../../data/repository/product_repository.dart';
 import '../controllers/home_controller.dart';
 import '../../cart/controllers/cart_controller.dart';
 
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<DioClient>(() => DioClient());
+
+    Get.lazyPut<ProductRemoteDataSource>(
+      () => ProductRemoteDataSourceImpl(Get.find<DioClient>()),
+    );
+
+    Get.lazyPut<ProductRepository>(
+      () => ProductRepositoryImpl(Get.find<ProductRemoteDataSource>()),
+    );
+
     Get.lazyPut<CartController>(() => CartController());
-    Get.lazyPut<HomeController>(() => HomeController());
+
+    Get.lazyPut<HomeController>(
+      () => HomeController(Get.find<ProductRepository>()),
+    );
   }
 }

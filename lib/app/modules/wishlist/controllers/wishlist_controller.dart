@@ -5,12 +5,7 @@ import '../../home/controllers/home_controller.dart';
 import '../../cart/controllers/cart_controller.dart';
 
 class WishlistController extends GetxController {
-  HomeController get homeController {
-    if (Get.isRegistered<HomeController>()) {
-      return Get.find<HomeController>();
-    }
-    return Get.put(HomeController());
-  }
+  HomeController get homeController => Get.find<HomeController>();
 
   CartController get cartController {
     if (Get.isRegistered<CartController>()) {
@@ -19,17 +14,14 @@ class WishlistController extends GetxController {
     return Get.put(CartController());
   }
 
-  // Filter katalog home berdasarkan favoriteIds
   List<ProductModel> get wishlistItems {
     return homeController.products
         .where((p) => homeController.favoriteIds.contains(p.id))
         .toList();
   }
 
-  // Badge keranjang
   int get cartCount => cartController.totalItemCount;
 
-  // Pindahkan item ke cart, lalu hapus dari favorit
   void moveToCart(ProductModel product) {
     cartController.addItem(product);
     homeController.toggleFavorite(product.id);
@@ -41,7 +33,6 @@ class WishlistController extends GetxController {
     );
   }
 
-  // Hapus dari favorit saja
   void removeFromWishlist(ProductModel product) {
     homeController.toggleFavorite(product.id);
   }
