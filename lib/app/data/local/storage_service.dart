@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+import '../models/product_model.dart';
+import 'product_local_datasource.dart';
+
 class StorageService extends GetxService {
   static const _themeKey = 'is_dark_mode';
 
@@ -11,7 +15,8 @@ class StorageService extends GetxService {
 
   bool get isDarkMode => _isDarkMode.value;
 
-  ThemeMode get themeMode => _isDarkMode.value ? ThemeMode.dark : ThemeMode.light;
+  ThemeMode get themeMode =>
+      _isDarkMode.value ? ThemeMode.dark : ThemeMode.light;
 
   Future<StorageService> init({bool initHive = true}) async {
     _prefs = await SharedPreferences.getInstance();
@@ -19,6 +24,17 @@ class StorageService extends GetxService {
 
     if (initHive) {
       await Hive.initFlutter();
+
+      if (!Hive.isAdapterRegistered(0)) {
+        Hive.registerAdapter(ProductModelAdapter());
+      }
+
+      await Hive.openBox<ProductModel>(
+        ProductLocalDataSourceImpl.productsBoxName,
+      );
+      await Hive.openBox<ProductModel>(
+        ProductLocalDataSourceImpl.wishlistBoxName,
+      );
     }
 
     return this;
@@ -27,10 +43,8 @@ class StorageService extends GetxService {
   Future<void> toggleTheme() async {
     _isDarkMode.value = !_isDarkMode.value;
     await _prefs.setBool(_themeKey, _isDarkMode.value);
-
     Get.changeThemeMode(themeMode);
 
-    // TANTANGAN: Snackbar feedback tema
     if (_isDarkMode.value) {
       Get.snackbar(
         'Mode Gelap Diaktifkan',

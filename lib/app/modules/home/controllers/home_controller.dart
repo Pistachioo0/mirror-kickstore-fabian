@@ -60,9 +60,10 @@ class HomeController extends GetxController {
     ),
   ];
 
-  @override
+  
   void onInit() {
     super.onInit();
+    favoriteIds.assignAll(_productRepository.getWishlist().map((e) => e.id));
     fetchProducts();
   }
 
@@ -121,11 +122,15 @@ class HomeController extends GetxController {
 
   bool isFavorite(String id) => favoriteIds.contains(id);
 
-  void toggleFavorite(String id) {
-    if (favoriteIds.contains(id)) {
-      favoriteIds.remove(id);
+  Future<void> toggleFavorite(String productId) async {
+    final product = products.firstWhereOrNull((p) => p.id == productId);
+    if (product == null) return;
+
+    final isNowFav = await _productRepository.toggleWishlist(product);
+    if (isNowFav) {
+      favoriteIds.add(productId);
     } else {
-      favoriteIds.add(id);
+      favoriteIds.remove(productId);
     }
   }
 

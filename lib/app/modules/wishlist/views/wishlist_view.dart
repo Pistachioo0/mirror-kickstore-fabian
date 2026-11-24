@@ -19,6 +19,14 @@ class WishlistView extends GetView<WishlistController> {
         ),
         title: const Text('Wishlist Favorit'),
         actions: [
+          Obx(() {
+            if (controller.wishlist.isEmpty) return const SizedBox.shrink();
+            return IconButton(
+              tooltip: 'Kosongkan Wishlist',
+              icon: const Icon(Icons.delete_sweep_rounded),
+              onPressed: controller.clearWishlist,
+            );
+          }),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -179,7 +187,7 @@ class WishlistView extends GetView<WishlistController> {
                             const SizedBox(width: 6),
                             IconButton(
                               onPressed: () =>
-                                  controller.removeFromWishlist(product),
+                                  controller.removeFromWishlist(product.id),
                               icon: const Icon(
                                   Icons.favorite_rounded,
                                   color: AppColors.error),
