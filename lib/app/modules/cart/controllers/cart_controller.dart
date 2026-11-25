@@ -1,94 +1,121 @@
 import 'package:get/get.dart';
 
-import '../../../../app/data/models/cart_item_model.dart';
-import '../../../../app/data/models/product_model.dart';
+import '../../../data/local/cart_local_datasource.dart';
+import '../../../data/models/cart_item_model.dart';
+import '../../../data/models/product_model.dart';
 
 class CartController extends GetxController {
-  // 1. State reaktif utama
+  final CartLocalDataSource? _localDataSource;
+
+  CartController({CartLocalDataSource? localDataSource})
+      : _localDataSource = localDataSource;
+
   final items = <CartItemModel>[].obs;
 
-  // 2. Total item (untuk badge AppBar)
+  CartLocalDataSource? get _ds {
+    if (_localDataSource != null) return _localDataSource;
+    if (Get.isRegistered<CartLocalDataSource>()) {
+      return Get.find<CartLocalDataSource>();
+    }
+    return null;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadFromStorage();
+  }
+
+  void _loadFromStorage() {
+    final ds = _ds;
+    if (ds != null) {
+      final saved = ds.getCartItems();
+      if (saved.isNotEmpty) items.assignAll(saved);
+    }
+  }
+
   int get totalItemCount =>
       items.fold(0, (sum, item) => sum + item.quantity);
 
-  // 3. Subtotal (harga barang sebelum pajak & ongkir)
-  int get subtotal =>
-      items.fold(0, (sum, item) => sum + item.subtotal);
+  int get subtotal => items.fold(0, (sum, item) => sum + item.subtotal);
 
-  // 4. PPN 11%
   int get tax => (subtotal * 0.11).round();
 
-  // 5. Ongkir: gratis jika subtotal >= Rp 2.000.000
   int get shippingFee => subtotal >= 2000000 ? 0 : 20000;
 
-  // 6. Total akhir
   int get totalAmount => subtotal + tax + shippingFee;
 
-  // 7. Formatter manual (tanpa intl)
-  String _formatRupiah(int amount) {
-    final formatted = amount.toString().replaceAllMapped(
+  String _fmt(int amount) {
+    final f = amount.toString().replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
           (m) => '${m[1]}.',
         );
-    return 'Rp $formatted';
+    return 'Rp $f';
   }
 
-  String get formattedSubtotal => _formatRupiah(subtotal);
-  String get formattedTax => _formatRupiah(tax);
+  String get formattedSubtotal => _fmt(subtotal);
+  String get formattedTax => _fmt(tax);
   String get formattedShipping =>
-      shippingFee == 0 ? 'Gratis' : _formatRupiah(shippingFee);
-  String get formattedTotal => _formatRupiah(totalAmount);
+      shippingFee == 0 ? 'Gratis' : _fmt(shippingFee);
+  String get formattedTotal => _fmt(totalAmount);
 
-  // 8. Tambah item ke keranjang
-  void addItem(
+  Future<void> addItemAsync(
     ProductModel product, {
     int quantity = 1,
     String size = '42',
-  }) {
+  }) async {
     final compositeId = '${product.id}_$size';
     final index = items.indexWhere((item) => item.id == compositeId);
 
     if (index >= 0) {
-      // Produk + size sama sudah ada → tambah kuantitas
       final existing = items[index];
-      items[index] = existing.copyWith(
+      final updated = existing.copyWith(
         quantity: existing.quantity + quantity,
       );
+      items[index] = updated;
+      await _ds?.saveCartItem(updated);
     } else {
-      // Produk + size baru → tambah baris baru
-      items.add(CartItemModel(
+      final newItem = CartItemModel(
+        id: compositeId,
         product: product,
         selectedSize: size,
         quantity: quantity,
-      ));
+      );
+      items.add(newItem);
+      await _ds?.saveCartItem(newItem);
     }
   }
 
-  // 9. Stepper kuantitas
-  void increaseQuantity(String id) {
+  Future<void> increaseQuantity(String id) async {
     final index = items.indexWhere((item) => item.id == id);
     if (index < 0) return;
     final item = items[index];
-    items[index] = item.copyWith(quantity: item.quantity + 1);
+    final updated = item.copyWith(quantity: item.quantity + 1);
+    items[index] = updated;
+    await _ds?.saveCartItem(updated);
   }
 
-  void decreaseQuantity(String id) {
+  Future<void> decreaseQuantity(String id) async {
     final index = items.indexWhere((item) => item.id == id);
     if (index < 0) return;
     final item = items[index];
     if (item.quantity <= 1) {
-      // Kuantitas 1 dikurangi → hapus item
       items.removeAt(index);
+      await _ds?.removeCartItem(id);
     } else {
-      items[index] = item.copyWith(quantity: item.quantity - 1);
+      final updated = item.copyWith(quantity: item.quantity - 1);
+      items[index] = updated;
+      await _ds?.saveCartItem(updated);
     }
   }
 
-  // 10. Hapus item
-  void removeItem(String id) {
+  Future<void> removeItem(String id) async {
     items.removeWhere((item) => item.id == id);
+    await _ds?.removeCartItem(id);
   }
 
-  // 11. Kosongkan keranjang
-  void clearCart() => items.clear();
+  Future<void> clearCartAsync() async {
+    items.clear();
+    await _ds?.clearCart();
+  }
 }

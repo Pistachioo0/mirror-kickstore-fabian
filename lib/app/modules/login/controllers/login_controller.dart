@@ -1,3 +1,4 @@
+import '../../../core/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -75,6 +76,17 @@ class LoginController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
     );
-    Get.offAllNamed(Routes.HOME);
+    await AuthService.to.login(emailController.text.trim());
+
+    String? returnRoute;
+    if (Get.isRegistered<AuthService>()) {
+      returnRoute = AuthService.to.redirectRoute;
+      AuthService.to.redirectRoute = null;
+    }
+    if (returnRoute != null && returnRoute.isNotEmpty) {
+      Get.offNamed(returnRoute);
+    } else {
+      Get.offAllNamed(Routes.HOME);
+    }
   }
 }

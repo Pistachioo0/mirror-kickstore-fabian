@@ -45,7 +45,7 @@ class WishlistController extends GetxController {
   }
 
   void moveToCart(ProductModel product) {
-    cartController.addItem(product);
+    cartController.addItemAsync(product);
     removeFromWishlist(product.id);
     Get.snackbar(
       'Dipindahkan',

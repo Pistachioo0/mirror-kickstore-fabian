@@ -1,3 +1,4 @@
+import '../../../data/local/cart_local_datasource.dart';
 import 'package:get/get.dart';
 
 import '../../../core/network/dio_client.dart';
@@ -25,6 +26,10 @@ class HomeBinding extends Bindings {
         Get.find<ProductRemoteDataSource>(),
         Get.find<ProductLocalDataSource>(),
       ),
+    );
+
+    Get.lazyPut<CartLocalDataSource>(
+      () => CartLocalDataSourceImpl(),
     );
 
     Get.lazyPut<CartController>(() => CartController());

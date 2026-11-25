@@ -1,3 +1,4 @@
+import '../core/middleware/auth_middleware.dart';
 import 'package:get/get.dart';
 
 import '../modules/cart/bindings/cart_binding.dart';
@@ -49,6 +50,7 @@ class AppPages {
       name: _Paths.CHECKOUT,
       page: () => const CheckoutView(),
       binding: CheckoutBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: _Paths.LOGIN,

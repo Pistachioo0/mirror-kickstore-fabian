@@ -1,17 +1,29 @@
+import 'package:hive_ce/hive.dart';
+
 import 'product_model.dart';
 
+part 'cart_item_model.g.dart';
+
+@HiveType(typeId: 1)
 class CartItemModel {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
   final ProductModel product;
+
+  @HiveField(2)
   final String selectedSize;
-  final int quantity;
+
+  @HiveField(3)
+  int quantity;
 
   CartItemModel({
+    required this.id,
     required this.product,
     required this.selectedSize,
     required this.quantity,
   });
-
-  String get id => '${product.id}_$selectedSize';
 
   int get subtotal => product.price * quantity;
 
@@ -25,6 +37,7 @@ class CartItemModel {
 
   CartItemModel copyWith({int? quantity}) {
     return CartItemModel(
+      id: id,
       product: product,
       selectedSize: selectedSize,
       quantity: quantity ?? this.quantity,

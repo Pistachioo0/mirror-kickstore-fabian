@@ -36,7 +36,7 @@ class DetailController extends GetxController {
 
   void addToCart() {
     if (product.value == null) return;
-    cartController.addItem(
+    cartController.addItemAsync(
       product.value!,
       quantity: quantity.value,
       size: selectedSize.value.toString(),

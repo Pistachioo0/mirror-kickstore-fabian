@@ -246,16 +246,12 @@ class CartView extends GetView<CartController> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Get.snackbar(
-                    'Checkout',
-                    'Total pembayaran ${controller.formattedTotal}',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.success,
-                    colorText: Colors.white,
-                    margin: const EdgeInsets.all(16),
-                    duration: const Duration(seconds: 2),
-                  );
-                },
+  if (controller.items.isEmpty) {
+    Get.snackbar('Keranjang Kosong', 'Tambahkan produk dulu.');
+    return;
+  }
+  Get.toNamed(Routes.CHECKOUT);
+},
                 icon: const Icon(Icons.payment_rounded),
                 label: const Text('Checkout'),
               ),
